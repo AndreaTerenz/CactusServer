@@ -1,7 +1,6 @@
 from flask import Flask, request, json
-import random
+import random, logging, atexit
 import src.lobby as lobby
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +24,26 @@ def create_lobby(player_name):
         'lobby_idx': l_idx,
         'success': True,
     }), 200, {'ContentType': 'application/json'}
+
+
+@app.route('/join-lobby/<player_name>/<lobby_id>', methods=['GET'])
+def join_lobby(player_name, lobby_id):
+    """Used to create a lobby"""
+    idx = lobby.find_lobby_idx(lobby_id)
+    ok = False
+
+    if idx != -1:
+        ok = lobby.join_lobby(player_name, idx)
+
+    if ok:
+        logging.info(f"Player '{player_name}' joined lobby '{lobby_id}'")
+        logging.info(f"Players in lobby '{lobby_id}': {lobby.players_in_lobby(lobby_id)}")
+
+    return json.dumps({
+        'lobby_id': lobby_id,
+        'lobby_idx': idx,
+        'success': ok,
+    }), 200 if ok else 400, {'ContentType': 'application/json'}
 
 
 @app.route('/leave-lobby/<player_name>/<lobby_id>', methods=['GET'])
@@ -52,6 +71,8 @@ def get_deck():
 
     return {'deck': deck}
 
+def on_shutdown():
+    pass
 
 if __name__ == '__main__':
     app.run()

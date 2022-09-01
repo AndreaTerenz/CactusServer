@@ -60,8 +60,11 @@ def new_lobby(creator_id: str):
 
 
 def join_lobby(player_id: str, lobby_idx: int):
-    if lobby_idx in range(len(lobbies)):
+    if lobby_idx in lobby_id_range():
         lobbies[lobby_idx].add_player(player_id)
+        return True
+
+    return False
 
 
 def leave_lobby(player_id: str, lobby_idx: int):
@@ -76,8 +79,10 @@ def leave_lobby(player_id: str, lobby_idx: int):
 
     return left, removed
 
+
 def lobby_id_range():
     return range(start_idx + len(lobbies))
+
 
 def find_lobby(lobby_id: str):
     for l in lobbies:
@@ -85,9 +90,19 @@ def find_lobby(lobby_id: str):
             return l
 
     return None
+
+
 def find_lobby_idx(lobby_id: str):
     for idx, l in enumerate(lobbies):
         if l.id == lobby_id:
             return idx
+
+    return -1
+
+
+def players_in_lobby(lobby_id: str):
+    l = find_lobby(lobby_id)
+    if l:
+        return len(l.players)
 
     return -1
